@@ -1,0 +1,22 @@
+
+// for Emacs users: -*- javascript -*-
+
+GET /lclslogs/_search
+{
+  "query": {
+    "query_string": {
+      "default_field": "src",
+      "query": "*"
+    }
+   },
+  "sort": { 
+     "_script": { 
+	"type": "number",
+	"order": "asc",
+	"script": { 
+	   "lang": "painless",
+	   "source": "Math.random() "
+	}
+     }
+  }
+}

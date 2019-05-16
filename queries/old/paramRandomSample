@@ -1,0 +1,45 @@
+
+# for Emacs users: -*- ruby -*-
+
+# Get a random sample of 20 distinct documents taken from 
+# all logs.
+
+# let's define default values, in case we do not 
+# pass parameters from the command line.
+PREPROC:
+puts "ATTENTION: this query can take some time ... "
+$sub[0] = "20"
+$sub[1] = "*"
+
+
+QUERY: 
+GET /lclslogs/_search
+{
+  "size" : _SUB0_,
+  "query": {
+    "query_string": {
+      "default_field": "src",
+      "query": "_SUB1_"
+    }
+   },
+  "sort": { 
+     "_script": { 
+	"type": "number",
+	"order": "asc",
+	"script": { 
+	   "lang": "painless",
+	   "source": "Math.random() "
+	}
+     }
+  }
+}
+
+POSTPROC: 
+totalHits = $jo["hits"]["total"].human 
+puts "total hits: #{totalHits}"
+$jo["hits"]["hits"].each do |hit|
+   puts hit["_source"]["src"]
+end 
+
+
+

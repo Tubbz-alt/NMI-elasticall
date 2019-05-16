@@ -1,0 +1,80 @@
+
+# for Emacs users: -*- ruby -*-
+
+# ========= Examples ==========================
+# 
+# -] Sample 20 elements from all documents stored in Elasticsearch 
+#    lclslogs index. 
+# $> ../elasticall paramRandomSample2 
+# 
+# -] Sample 1000 elements from all documents 
+# 
+# $> ../elasticall --s0=1000 paramRandomSample2
+#
+# -] Sample 100 elements from all docuemts satsifying the Lucene query 'nmingott'
+# 
+# $> ../elasticall --s0=100 --s1='nmingott' paramRandomSample2 
+# 
+# -] Sample 20 elements from all docuemtna satisfaying the Lucene query 
+#    'nmingott' and whose date is between today and 3 days ago, extreme included.
+# 
+# $> ../elasticall --s0=100 --s1='nmingott' --s2='now-3d' --s3='now' paramRandomSample2 
+# 
+# ============================================
+
+# Get a random sample of 20 distinct documents taken from 
+# all logs.
+
+# let's define default values, in case we do not 
+# pass parameters from the command line.
+PREPROC:
+puts "ATTENTION: this query can take some time ... "
+# number of lines we want to see in output (max about 10,000)
+$sub[0] = "20"
+# query we want to look for 
+$sub[1] = "*"
+# minimum date in the time range of interest
+# tipical value is "1970-01-01" or "now-1d" or "now-1y"
+$sub[2] = "1970-01-01"
+# maximum date in the time range of interest
+$sub[3] = "now"
+
+
+QUERY: 
+GET /lclslogs/_search
+{
+  "size" : _SUB0_,
+  "query" : {
+   "bool": {
+    "must": {
+     "query_string": {
+       "default_field" : "src",
+        "query": "_SUB1_"
+      }},
+    "filter": { 
+     "range": { 
+      "date": { 
+        "gte": "_SUB2_",
+        "lte": "_SUB3_"
+     }}}}},
+  "sort": { 
+     "_script": { 
+	"type": "number",
+	"order": "asc",
+	"script": { 
+	   "lang": "painless",
+	   "source": "Math.random() "
+	}
+     }
+  }
+}
+
+POSTPROC: 
+totalHits = $jo["hits"]["total"].human 
+puts "total hits: #{totalHits}"
+$jo["hits"]["hits"].each do |hit|
+   puts hit["_source"]["src"]
+end 
+
+
+

@@ -1,0 +1,62 @@
+
+# for Emacs users: -*- ruby -*-
+
+# This query is to count the number of results (the number of documents)
+# returned by a specific Lucene Query. 
+#
+# The Query string is to be passed in argument '--s0='
+#
+# By default the output is controlled by the POSTPROCESSING
+# part of this script. 
+#
+# 
+# Examples:
+# $> elasticall --s0='psana101'  thisFile 
+# $> elasticall --s0='machine:psmetric01'  thisFile
+# 
+# -] View the JSOS reponse from Elasticsearch 
+# $> elasticall -j --s0='machine:psmetric01'  thisFile
+#
+# -] View various debug information, and intermediate processing of the 
+#    query life. 
+# $> 
+# $> elasticall -d --s0='machine:psmetric01'  thisFile
+# $> elasticall --s0='*' --s1='now-10d' --s2='now'
+
+
+PREPROC:
+# Lucene query string 
+$sub[0] = "nmingott"
+# tipical value is "1970-01-01" or "now-1d" or "now-1y"
+$sub[1] = "1970-01-01"
+# maximum date in the time range of interest
+$sub[2] = "now"
+
+
+QUERY:
+GET /lclslogs/_search
+{
+  "size": 0,
+  "query" : {
+   "bool": {
+    "must": {
+     "query_string": {
+       "default_field" : "src",
+        "query": "_SUB0_"
+      }},
+    "filter": { 
+     "range": { 
+      "date": { 
+        "gte": "_SUB1_",
+        "lte": "_SUB2_"
+     }}}}}
+}
+
+# Post-Processing section, 
+# This section contains Ruby code
+# Variable $jo is bound to the Ruby parsed JSON output from Elasticsearch
+POSTPROC:
+out = $jo["hits"]["total"].human 
+puts %Q(querys: '#{$sub[0]}', num.doc: #{out} )
+
+

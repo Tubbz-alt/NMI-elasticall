@@ -1,0 +1,16 @@
+
+// for Emacs users: -*- javascript -*-
+
+// this is a comment 
+
+GET /lclslogs/_search
+{
+  "query": {
+    "term": {
+      "_id":"qGEbDGkBN2ZOTHqY1Zdi"
+    } 
+  } 
+}
+
+
+

@@ -1,0 +1,327 @@
+#!/opt/rh/rh-ruby25/root/usr/bin/ruby
+
+# Eamscs mode is ruby-mode:  -*- ruby -*-
+
+doc=<<EOD
+
+Runs an Elasticsearch command/script contained in the file
+whose path is in the last parameter. The filename can be "--"
+in such case the file will be read from STDIN.
+
+The script format is the same used on the Web and it is most similar to
+what can be run in Kibana "DevTools". There are the moment a few differences
+respect to Kibana:
+
+1] In our script we accept comment lines. A comment line has the first 
+   non blank two characters corresponding to //. 
+
+2] Our script still do not impolement the """ .....  """" syntax wich is 
+   admintted in Kibana.  
+
+Script Parameters:
+
+-h : show the help 
+
+-j : output in prettyfied JSON format
+
+-d : show debug info
+
+--s0=fooBar : Substitute all the occurrencies of '_SUB0_' in the script 
+              with fooBar.
+
+--evo=''    : Evaluate a Ruby code, where JO is the Javascript Output 
+              obtained from Ealsticsearch, already parsed in Ruby. 
+              The main objective here is pretty printing the result of interest.
+
+Example 1:
+
+Get a random sample without raplacement of 20 distinct documents (logs) taken from
+all documents in the index "lclslogs".
+
+----- sampler.txt -------
+// for Emacs users: -*- javascript -*-
+
+// ATTENTION: this can take some time to run.
+
+// Get a random sample of 20 distinct documents taken from 
+// all logs.
+
+GET /lclslogs/_search
+{
+  "size" : 20,
+  "query": {
+    "query_string": {
+      "default_field": "src",
+      "query": "*"
+    }
+   },
+  "sort": { 
+     "_script": { 
+	"type": "number",
+	"order": "asc",
+	"script": { 
+	   "lang": "painless",
+	   "source": "Math.random() "
+	}
+     }
+  }
+}
+-----------------------
+$> elasticall sampler.txt 
+ or 
+$> cat sampler.txt | elasticall -- 
+
+Since query have mostly Javascript syntax, maybe with some Java
+scripting stuff, it may be convenient to insert as first/second line: 
+// for Emacs users: -*- javascript -*-
+
+EOD
+
+
+require 'json'
+require 'pry'
+
+
+
+# -] A bit of overloading to add the "human" method and print
+#    nicely long integer numbers.
+# 
+class String 
+  def human()
+    if (not self.match(/^\d+/)) then 
+      return self
+    else
+      self.reverse.gsub(/(\d{3})(?=\d)/,'\1,').reverse
+    end
+  end
+end 
+
+class Numeric
+  def human()
+    return self.to_s.human
+  end
+end 
+
+
+
+# -] Set operative parameters to default value and inspect ARGV 
+#    to change their values
+# 
+# if set to true a pletora of debug info is printed
+$dbg = false
+# 
+# show the output in pretty-printed JSON format 
+$jout = false 
+# 
+# list of vales taken from the command lines and to be substituted
+# to '_SUB0_', '_SUB1_' , ... in the script.
+$sub = []
+# 
+# "evo" the Ruby code to be evaluated 
+$evo = nil 
+# 
+# Ruby Parsed JSON output of the Elasticsearch result 
+$jo = nil 
+# 
+ARGV.each do |ar|
+  if ar == "-h" then
+     STDOUT.puts "#{doc}"
+     exit(0)
+  end 
+  $dbg = true if ar == "-d" 
+  $jout = true if ar == "-j"
+  # 
+  # Processing "--sX=foo" parameters => fills the vector $sub[0], $sub[1]....
+  # if (ar.match /\-\-s\d/) then 
+  #   if (not (ar.match /\=/)) then 
+  #     STDERR.puts "Error, a subsitution arguments is to be used as '--s0=foobar'."
+  #     exit(2)
+  #   end
+  #   # get the digit e.g. "3" in '--s3=fooBla'
+  #   digit = ar.match(/\-\-s(\d)/).captures[0]
+  #   arIni, arSub = ar.split /\=/
+  #   $sub[digit.to_i] = arSub
+  # end
+  # 
+  # Evaluation of Ruby code for post-processing 
+  if (ar.match /\-\-evo/) then 
+    if (not (ar.match /\=/)) then 
+      STDERR.puts "Error, 'evo' parameter is to be used as '--evo=foobar'."
+      exit(2)
+    end    
+    arIni, arSub = ar.split /\=/
+    $evo = arSub    
+  end 
+end 
+
+
+# Get the filename containing the Elastic query 
+# 
+fname = ARGV[-1]
+if fname.nil? then 
+  STDERR.puts "Error, first parameter must be a filename."
+  exit(1)
+end 
+
+# Check if file exists 
+# 
+if ((not File.file?(fname)) and (fname != "--") ) then  
+  STDERR.puts "Error, file not found: '#{fname}' ."
+  exit(1)   
+end 
+
+# Get the Extened-Elastic script to be sent and remove 
+# comment lines and empty lines.
+# 
+if (fname == "--") then 
+  script = STDIN.read 
+else 
+  script = File.open(fname,"r").read 
+end 
+
+# -] The script must container three sections: PREPROC, QUERY and POSTPROC
+#    if there seaction separator are not found the script aborts. 
+#    The script part preceeding PREPROC is called "intro" and should contain
+#    nothing but comments.
+# 
+
+# check presence of the test section separators  
+if (not ((script =~ /PREPROC:/)  and 
+         (script =~ /QUERY:/)   and 
+         (script =~ /POSTPROC:/))) then 
+  STDERR.puts "Error, the script must contain the three keywords {PREPROC: , QUERY: , POSTPROC:}."
+  exit(2)
+end 
+
+# split "script" text in sections
+preproc = nil; query = nil; postproc = nil;
+intro, preproc, query, postproc = script.split(/PREPROC:|QUERY:|POSTPROC:/)
+
+# print sections explicitely, if we are in debug mode.
+puts "=== INTRO    ====================================== #{intro}" if $dbg
+puts "=== PREPROC  ====================================== #{preproc}" if $dbg
+puts "=== QUERY    ======================================  #{query}" if $dbg
+puts "=== POSTPROC ====================================== #{postproc}" if $dbg
+puts "=========================================================" if $dbg
+
+# -] Remove comment lines and empty lines.
+#    comment lines are here lines starting with # or with // 
+#   
+query.gsub! /^(\s*)\#(.*)/, ""
+query.gsub! /^(\s*)\/\/(.*)/, ""
+query.gsub! /(^|\n)(\s*)(\n|$)/m, ""
+
+# -] Evaluate the PREPROC section
+#    where most often default parameters value are defined.
+# 
+eval(preproc)
+
+# -] The "--sX=..." parameters in ARGV can overwrite the values of $sub[]  
+#    defined in PREPROC, so they are evaluated here.
+# 
+ARGV.each do |ar| 
+  if (ar.match /\-\-s\d/) then 
+    if (not (ar.match /\=/)) then 
+      STDERR.puts "Error, a subsitution arguments is to be used as '--s0=foobar'."
+      exit(2)
+    end
+    # get the digit e.g. "3" in '--s3=fooBla'
+    digit = ar.match(/\-\-s(\d)/).captures[0]
+    arIni, arSub = ar.split /\=/
+    $sub[digit.to_i] = arSub
+  end
+end 
+
+
+# -] Get query tipe and target. 
+#    Looks at the first line in the QUERY section.
+#    Query tipe can be {GET, PUT, ... } 
+# 
+tmp = query.split(/\n/)
+queryHead, queryBody = tmp[0], tmp[1..-1].join("\n")
+# if the queryHead is not found exit the script 
+if queryHead.nil? then 
+  STDERR.puts "Error, can't fine the query header line, (where GET/PUT/... is defined)."
+  exit(2)
+end 
+# if we are here the queryHead has been found, we want to extract the "GET/PUT ..." part
+# and the target part.
+httpCmd, httpTarget = queryHead.strip.split /\s/ 
+httpCmd.strip!
+httpTarget.strip!
+# if httpCmd or httpTarget are empty abort the script 
+if (httpCmd == "" or httpTarget == "") then 
+  STDERR.puts "Error, httpCmd or httpTarget are empty, they must not be."
+  exit(2)
+end 
+
+# -] Do substitutions on the query body to match the "--sJ=xxx" parameters
+#    on the command line. 
+$sub.each_with_index do |val, idx|
+  # toSub = "_SUB#{idx}_"
+  queryBody.gsub! /_SUB#{idx}_/, "#{$sub[idx]}"
+end 
+# queryBody.gsub! /_SUB0_/, "#{$sub[0]}"
+
+# -] Print some debug info, if necessary  
+# 
+puts "DBG> var dbg: #{$dbg}" if $dbg 
+puts "DBG> headline: #{queryHead}" if $dbg 
+
+# Build the curl command line, run it and store the pretty printed result
+# 
+# 
+curLine = %Q[curl -s -X#{httpCmd} 'http://psmetric04:9200#{httpTarget}' 
+                 -H 'Content-Type: application/json' 
+                 -d '\n#{queryBody}' ]
+# 
+# curLine without newlines and useless spaces
+# 
+curLineCompact = curLine.dup
+curLineCompact.gsub! /\n/, " ";
+curLineCompact.gsub! /\s+/, " ";
+
+out = `#{curLineCompact}`
+
+# pretty printed JSON string, for output 
+# 
+prettyOut = JSON.pretty_generate(JSON.parse(out))
+
+
+# -] Print some debug info, if necessary  
+# 
+puts "DBG> httpCmd: #{httpCmd} , target: #{httpTarget}"  if $dbg 
+puts "DBG> curLine: \n#{curLine}" if $dbg 
+puts "DBG> curLineCompact: \n#{curLineCompact}"  if $dbg 
+
+
+# -] If the "POSTPROC" section is empty or nil then 
+#    print the JSON output. if the POSTPROC section is present
+#    and the "-j" parameter is specified then print the JSON output
+#    before showing the POSTPORC stuff.
+# 
+if ((postproc.nil?) or postproc.strip.match(/^\s*$/)) then 
+  puts prettyOut
+elsif ($jout == true) then 
+  puts prettyOut
+end 
+
+# binding.pry
+
+# -] Global variable to be used in postprocessing, it contains
+#    the Ruby Parsed JSON string given as response from Elasticsearch
+# 
+$jo = JSON.parse(out)
+
+# -] If the 'POSTPROC' part of the script exist then evaluate it 
+# 
+if (not postproc.nil?) then 
+  eval(postproc)
+end 
+
+if (not $evo.nil?) then 
+  puts "DBG> evo: #{$evo} " if $dbg
+  eval($evo)
+end 
+ 
+exit(0)

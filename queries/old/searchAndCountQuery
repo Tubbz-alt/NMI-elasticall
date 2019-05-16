@@ -1,0 +1,35 @@
+
+// for Emacs users: -*- javascript -*-
+
+// This query is to count the number of results 
+// run with parameter "-j" to show the JSON output
+// instead of the log lines.
+
+// $> elasticall -j searchAndCountQuery
+
+GET /lclslogs/_search
+{
+  "size": 0,
+  "query": {
+    "query_string": {
+      "default_field": "src",
+      "query": "psana*"
+    }
+   }
+//  ,
+  // "sort": { 
+  //    "_script": { 
+  // 	"type": "number",
+  // 	"order": "asc",
+  // 	"script": { 
+  // 	   "lang": "painless",
+  // 	   "source": "Math.random() "
+  // 	}
+  //    }
+  // }
+}
+
+
+
+
+

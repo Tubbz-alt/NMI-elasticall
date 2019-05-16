@@ -1,0 +1,28 @@
+
+// for Emacs users: -*- javascript -*-
+
+// ATTENTION: this can take some time to run.
+
+// Get a random sample of 20 distinct documents taken from 
+// all logs.
+
+GET /lclslogs/_search
+{
+  "size" : 20,
+  "query": {
+    "query_string": {
+      "default_field": "src",
+      "query": "*"
+    }
+   },
+  "sort": { 
+     "_script": { 
+	"type": "number",
+	"order": "asc",
+	"script": { 
+	   "lang": "painless",
+	   "source": "Math.random() "
+	}
+     }
+  }
+}

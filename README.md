@@ -1,15 +1,31 @@
 
 # elasticall
+Shell tool to query and monitor Elasticsearch
 
-Shell tool to monitor Elasticsearch running advanced queries.
+## Motivation
 
-**Motivation**. I want to be able to run take a random sample from Elasticsearch, I want to do it from the shell and I want the thing to be as practical as possible. I would like the computer to manage a question like this: "Jarvis, show me a random sample log lines made in the last 2 days". 
+I would like to be able to give such kind of high level commands from the shell: 
 
-The script `elasticall` was made to throw very complex queries to Elasticsearch and beutify the output results. As such, it is a tool that frees the user from the tedious interactions with JSON. Taking random sample is just anohter, not trivial, Elasticsearch query.
+1. "Computer, tell me how many log lines entered Eleasticsearch in the last hour."
+2. "Computer, give me a random sample of log lines stored into Elasticsearch index lcslogs in the last month."
+3. "Computer, tell me how long the Elasticsearch has been running and how much heap space is available".
+4. "Computer, give me all log lines produced in the last hour containing the word 'error'."
+
+Commands [1,2,3,4] provide interesting output but there is more we can get than the sheer answer. Running `time` on command [2] is the best way I can figure out to measure the **search time performance** of Elasticsearch. Indeed, to take a random sample Elasticsearch is forced to visit all the sample-space each time. If you repeat two time the same command you should get similar response time.
+
+Looking at command [4] `elasticall` seems similar to a previously developed tool called [elastico](https://github.com/slac-lcls/elastico), which also runs Elasticsearch queries from the shell. *elastico* though is a tool customized to search into logs, that is, to search into our *lclslogs* index. Conversely, *elasticall* can run very general parametric queries and it is index agnostic. Respect to *elastico*, *elasticall* is more general, more powerfull and more difficult to use.
+
+
+`elasticall` was made to throw very complex queries to Elasticsearch and beutify the output results. As such, it is a tool that frees the user from the tedious interactions with JSON. Taking random sample is just anohter, not trivial, Elasticsearch query.
+
+`elasticall` calls always a **recipe script file**, the recipe file containes [1] the JSON command to send to Elasticsearch in a very readable format [2] preprocessing routines and [3] postprocessing routines. I give a few examples of script files below, using them as template it is not difficult to extend *elasticall* capabilities but adding new scripts. 
+
+`$> elasticall -h` provides a brief manual page. The provided script files available in directory *query* and are commented.
+
 
 ## Installation & run
 
-***CAVEAT.*** The procedure is tested working for **LCLS-logs** Elasticsearch index, for the program to be installed in *psmetric01*. Other users in other networks need to properly adapt the Elasticsearch address and index in the *elasticall* file.
+***CAVEAT.*** The procedure is tested working for **lclslogs** Elasticsearch index and for the program `elasticall` to be installed in *psmetric01*. Other users in other networks need to tweak some details, as the Elasticsearch URL, in the source code.
 
 - Get the source from GitHub
 - Run the installation script: `$> sudo install`
@@ -33,17 +49,18 @@ $> elasticall --s0='*' /usr/local/etc/elasticall/paramSearchAndCount
 
 ## Heads up ! 
 
-**CAVEAT for LCLS users.** Before you do any test you must be aware of this important fact. `elasticall` runs in *psmetric01* but the Elasticsearch server runs in *psmetric04*. If you run a search that takes time and kill `elasticall` by e.g. `Ctrl+C,` or `kill`, the search will keep on running on *psmetric04*! 
+**CAVEAT for LCLS users.** Before you do any test you must be aware of this important fact. `elasticall` runs in *psmetric01* but the Elasticsearch server runs in *psmetric04*. If you run a search that takes time and kill `elasticall` before it ends, by e.g. `Ctrl+C,` or `kill`, the search will keep on running on *psmetric04*! 
 
 If you intend to run multiple queries via `elasticall` and kill them librerally then keep an eye on *psmetric04* load with `top`. A CPU load of about *500%* in `top` is expected when you run long and complex queries.
 
 
-## Random Sample to measure performace
+## Random Sample to measure search performace
 
-The first reason I for me to want a random sample over Elasticsearch  was to measure its Elasticsearch performance. Indeed, a random sample, if well performed, implies that all the sample space must be visited at each run. It makes no sense to cache results. 
+**Def.** What is called here **random sample** is a shortcut for 'random sample without replacement'. This is what I implemented.
 
+A random sample, if well taken, implies that all the sample space must be visited at each run. It makes no sense to cache results. Also, if the sample space is large enough, it is impossible to cache it in RAM.
 
-***CASE.1*** Random sample without parameters, by default runs on all of Elasticsearch data and returns 20 lines. 
+***CASE.1*** Random sample without parameters, by default runs on all of Elasticsearch *lclslogs* index and returns 20 lines. 
 
 ```
 $> time elasticall queries/paramRandomSample2
@@ -61,11 +78,11 @@ sys     0m0.026s
 ```
 
 **OBSERVE**
-- There are about 550 milion lines stored into Elasticsearch. 
+- There are about 550 milion lines stored into Elasticsearch *lclslogs* index. 
 - The search took 1 minute and 20 seconds, it is quite a lot. This time is expected to increase on increasing the amount of data stored into Elasticsearch.
 
 
-***CASE.2*** Random sample of 5 lines over all lines produced in the last betwwn `now` and 3 days ago `now-3d`.
+***CASE.2*** Random sample of 5 lines over all lines produced in between `now` and 3 days ago `now-3d`.
 
 ```
  time elasticall --s0=5 --s2='now-3d' --s3='now'  \
@@ -91,30 +108,38 @@ sys     0m0.029s
 - The query took about 0.2 seconds to be resolved.
 - This amount of time is expected not to grow much in future.
 
-***CASE.3*** Random sample of 5 lines over all lines produced in the last month and matching the Lucene query `nmingott AND NOT psmetric`.
+***CASE.3*** Random sample of 5 lines over all lines produced in the last month and matching the Lucene query `nmingott AND (NOT psmetric*)`. 
 
 ```
-$> time elasticall --s0=5 --s1='nmingott' \
-                   --s2='now-3d' --s3='now' \
+time elasticall --s0=5 --s1='nmingott AND (NOT psmetric*)' \
                    /usr/local/etc/elasticall/paramRandomSample2 
 ```
+
 ```
 ATTENTION: this query can take some time ... 
-total hits: 408
-May 14 03:56:29 psmetric01 crontab[15949]: (root) LIST (nmingott)
-May 13 17:22:48 psmetric01 sudo: pam_unix(sudo:session): session opened for user root by nmingott(uid=0)
-May 15 22:56:29 psmetric01 crontab[8537]: (root) LIST (nmingott)
-May 14 09:26:31 psmetric01 crontab[10929]: (root) LIST (nmingott)
-May 16 10:55:39 psmetric04 sshd[28092]: Accepted gssapi-with-mic for nmingott from 134.79.101.10 port 42160 ssh2
+total hits: 101,995
+Dec 26 07:55:01 psanagpu101 systemd[1]: Starting Session 1819742 of user nmingott.
+Dec 16 12:00:01 psanagpu101 systemd[1]: Started Session 1665130 of user nmingott.
+Dec 31 22:45:01 psanagpu101 CROND[2202]: (nmingott) CMD (export CRON_RUN="true"; /reg/neh/home/nmingott/cronScripts/thisMachineStatusToElastic.rb)
+Dec 14 10:10:01 psanagpu103 CROND[9996]: (nmingott) CMD (export CRON_RUN="true"; /reg/neh/home/nmingott/cronScripts/thisMachineStatusToElastic.rb)
+Dec 20 06:40:01 psana102 systemd: Starting Session 5116 of user nmingott.
 
-real    0m0.262s
-user    0m0.190s
-sys     0m0.022s
+real    0m0.455s
+user    0m0.205s
+sys     0m0.023s
 ```
-
 
 ## Random Sample to detect anomalies 
 
+The validity of the method proposed in this section relies on **one powerfull assumtion**: *when something starts to go wrong in a machine there will be a massive production of similar error messages*.
+
+Sometimes the assumption may not hold, e.g. a machine may have the powersupply broken, there will not be any error log in this case, the machine will turn off. We disregard this kind of failures now.
+
+The supposedly there is something wrong in our machines and a consequent massive production of error messages how could we spot the fact without too much technicalities? We just take a random sample, if we see repeated messages there is a good probability we have a problem.
+
+Then, there are problem that are logstanding, we can not fix them in one day, so it is often usefull to compare our current random sample with an old one. 
+
+Let's see an example. We start by taking a random sample of messages from the few last days. 
 
 ```
 $> time elasticall --s0=20 --s2='now-2d' --s3='now'\
@@ -149,7 +174,9 @@ user    0m0.194s
 sys     0m0.024s
 ```
 
-Compare with a sample of 20 messages taken in the space of log messages produced between 1 and 2 months ago. 
+We see there is something to fix in *psanagpu104* and in general it is the service *rpc.gssd*, it seems an authentication problem.
+
+Let's compare with a sample of 20 messages produced between 1 and 2 months ago. 
 
 ```
  $> time elasticall --s0=20 --s2='now-2M' --s3='now-1M' \
@@ -185,9 +212,16 @@ user    0m0.188s
 sys     0m0.028s
 ```
 
+We see the service *rpc.gssd* does not appear at all in the past. This must be a recent problem. 
 
-The analysis is very crude but we can already establish with a good degree of confidence ***we have a problem in *psanagpu104****. Indeed, its frequent presence in the sample carries error messages and it is not reflected in the sample produced from old logs.
+Something persisting from the past instead is in machine *psrealay*, a *dhcpd* error message. It seems some computer is not getting an IP. 
 
+The analysis is very crude but we can already establish with a good degree of confidence that we ***may have a problem in *psanagpu104****. 
+
+
+## Getting the status of Elasticsearch 
+
+## Let's do some scripting 
 
 ## Counting documents, aka log lines
 

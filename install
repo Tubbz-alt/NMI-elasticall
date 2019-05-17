@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+# for emacs people, -*- mode: ruby -*-
+
+# -] Run this file to install "elasticall" in the system.
+# -] It is necessary to have ruby version installed.
+# $> sudo install 
+
+require 'fileutils'
+
+$BIN_DIR = "/usr/bin"
+$EXAMPLE_QUERY_DIR = "/usr/local/etc/elasticall"
+
+# -] copy the main script to BIN_DIR
+FileUtils.cp "./elasticall", "#{$BIN_DIR}/elasticall"
+
+# -] copy the example queries to "/usr/local/etc/elasticall"
+#    creating the directory if it does not exist
+if ! (File.exists? $EXAMPLE_QUERY_DIR) then 
+  FileUtils.mkdir $EXAMPLE_QUERY_DIR
+end 
+
+# copy the query files to EXAMPLE_QUERY_DIR
+Dir.glob "./queries/*" do |f| 
+  if File.file?(f) then 
+    FileUtils.cp f, $EXAMPLE_QUERY_DIR
+  end
+end 
+
+
+
+
+

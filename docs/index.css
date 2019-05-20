@@ -12,7 +12,7 @@
 body {
 
     /* font-family: "Times New Roman", Times, serif; */
-    font-family: "sans-serif";
+    font-family: "sans";
     font-size: 1.0em;
     line-height: 1.5;
 
@@ -79,7 +79,7 @@ li.fact {
 }
 
 span.cmd { 
-   font-family: "monospace";
+   font-family: "mono";
    font-size: 0.90em;
    /* font-family: monospace; */
     background-color: lightgrey;
@@ -87,7 +87,7 @@ span.cmd {
 }
 
 div.cmd { 
-   font-family: "monospace";
+   font-family: "mono";
    font-size: 0.90em;
    /* font-family: monospace; */
    white-space: pre-wrap;
@@ -105,8 +105,8 @@ div.withOutput {
 }
 
 div.output { 
-   font-family: "monospace";
-   font-size: 0.80em;
+   font-family: "mono";
+   font-size: 0.90em;
    /* font-family: monospace; */
     overflow-x: auto;
    /* white-space: pre-wrap; */

@@ -24,11 +24,12 @@
 
 <body>
 
-<!-- <div class="centerDiv"><h2> Software Homepage</h2></div> -->
-<!-- <div class="centerDiv"><h2> "elasticall" </h2></div> -->
 
 <h1> elasticall </h1>
-Shell tool to query and monitor Elasticsearch
+<hr>
+<p>
+A shell tool to query and monitor Elasticsearch.
+</p>
 
 <h2> Motivation </h2>
 <hr>
@@ -36,10 +37,10 @@ Shell tool to query and monitor Elasticsearch
 I would like to be able to give such kind of high level commands from the shell: 
 
 <ol>
-<li> "Computer, tell me how many log lines entered Eleasticsearch in the last hour."
-<li> "Computer, give me a random sample of log lines stored into Elasticsearch index lcslogs in the last month."
-<li> "Computer, tell me how long the Elasticsearch has been running and how much heap space is available".
-<li> "Computer, give me all log lines produced in the last hour containing the word 'error'."
+<li> "Computer, tell me how many log lines entered Elasticsearch in the last hour."
+<li> "Give me a random sample of log lines stored into Elasticsearch index <i>lclsogs</i> in the last month."
+<li> "Tell me how long the Elasticsearch has been running and how much heap space is available".
+<li> "Give me all log lines produced in the last hour containing the word 'error'."
 </ol>
 
 <p>
@@ -47,19 +48,19 @@ Commands [1,2,3,4] provide interesting output but there is more we can get than 
 </p>
 
 <p>
-Looking at command [4] <span class="cmd">elasticall</span> seems similar to a previously developed tool called [elastico](https://github.com/slac-lcls/elastico), which also runs Elasticsearch queries from the shell. <i>elastico</i> though is a tool customized to search into logs, that is, to search into our <i>lclslogs</i> index. Conversely, <i>elasticall</i> can run very general parametric queries and it is index agnostic. Respect to <i>elastico</i>, <i>elasticall</i> is more general, more powerfull and more difficult to use.
+Looking at command [4] <span class="cmd">elasticall</span> seems similar to a previously developed tool called <a href="https://github.com/slac-lcls/elastico">elastico</a>, which also runs Elasticsearch queries from the shell. <i>elastico</i> though is a tool customized to search into logs, that is, to search into our <i>lclslogs</i> index. Conversely, <i>elasticall</i> can run very general parametric queries and it is index agnostic. Respect to <i>elastico</i>, <i>elasticall</i> is more general, more powerful and more difficult to use.
 </p>
 
 <p>
-<span class="cmd">elasticall</span> was made to throw very complex queries to Elasticsearch and beutify the output results. As such, it is a tool that frees the user from the tedious interactions with JSON. Taking random sample is just anohter, not trivial, Elasticsearch query.
+<span class="cmd">elasticall</span> was made to throw very complex queries to Elasticsearch and beautify the output results. As such, it is a tool that frees the user from the tedious interactions with JSON. Taking a random sample is just another, not trivial, Elasticsearch query.
 </p>
 
 <p>
-<span class="cmd">elasticall</span> calls always a <b>recipe script file</b>, the recipe file containes [1] the JSON command to send to Elasticsearch in a very readable format [2] preprocessing routines and [3] postprocessing routines. I give a few examples of script files below, using them as template it is not difficult to extend <i>elasticall</i> capabilities but adding new scripts. 
+<span class="cmd">elasticall</span> calls always a <b>recipe script file</b>, the recipe file contains [1] the JSON command to send to Elasticsearch in a very readable format [2] preprocessing routines and [3] postprocessing routines. I give a few examples of script files below, using them as template it is not difficult to extend <i>elasticall</i> capabilities by adding new scripts. 
 </p>
 
 <p>
-<span class="cmd">$> elasticall -h</span> provides a brief manual page. The provided script files available in directory <i>query</i> and are commented.
+<span class="cmd">$> elasticall -h</span> provides a brief manual page. 
 </p>
 
 <h2> Installation & run</h2>
@@ -70,8 +71,8 @@ Looking at command [4] <span class="cmd">elasticall</span> seems similar to a pr
 </p>
 
 <ul>
-<li>  Get the source from GitHub
-<li>  Run the installation script: <span class="cmd">$> sudo install</span>
+<li>  Get the source from GitHub.
+<li>  Run the installation script: <span class="cmd">$> sudo install</span>.
 <li>  Test run, shows the builtin manual: 
 
 <div class="cmd">
@@ -85,7 +86,7 @@ $> elasticall --s0='*' /usr/local/etc/elasticall/paramSearchAndCount
 </div>
 
 <div class="output">
-=> querys: '*', num.doc: 557,668,598
+=> queries: '*', num.doc: 557,668,598
 </div>
 </ul>
 
@@ -94,14 +95,14 @@ $> elasticall --s0='*' /usr/local/etc/elasticall/paramSearchAndCount
 <hr>
 
 <p>
-<b>CAVEAT for LCLS users.</b> Before you do any test you must be aware of this important fact. <span class="cmd">elasticall</span> runs in <b>psmetric01</b> but the Elasticsearch server runs in <b>psmetric04</b>. If you run a search that takes time and kill <span class="cmd">elasticall</span> before it ends, by e.g. <span class="cmd">Ctrl+C</span>, or <span class="cmd">kill</span>, the search will keep on running on <b>psmetric04</b>! 
+<b>CAVEAT for LCLS users.</b> Before you do any test you must be aware of this important fact. <span class="cmd">elasticall</span> runs in <b>psmetric01</b> but the Elasticsearch server runs in <b>psmetric04</b>. If you run a search that takes time and kill <span class="cmd">elasticall</span> before it ends, e.g. by pressing <span class="cmd">Ctrl+C</span>, or typing <span class="cmd">kill</span>, the search will keep on running on <b>psmetric04</b>! 
 </p>
 
 <p>
-If you intend to run multiple queries via <span class="cmd">elasticall</span> and kill them librerally then keep an eye on <b>psmetric04</b> load with <span class="cmd">top</span>. A CPU load of about <b>500%</b> in <span class="cmd">top</span> is expected when you run long and complex queries.
+If you intend to run multiple queries via <span class="cmd">elasticall</span> and kill them liberally then keep an eye on <b>psmetric04</b> load with <span class="cmd">top</span>. A CPU load of about <b>500%</b> in <span class="cmd">top</span> is expected when you run long and complex queries.
 </p>
 
-<h2> Random Sample to measure search performace </h2>
+<h2> Random Sample to measure search performance </h2>
 <hr>
 
 <p>
@@ -113,7 +114,7 @@ A random sample, if well taken, implies that all the sample space must be visite
 </p>
 
 <p>
-<b>CASE.1</b> Random sample without parameters, by default runs on all of Elasticsearch <i>lclslogs</i> index and returns 20 lines. 
+<b>CASE 1.</b> Random sample without parameters, by default runs on all of Elasticsearch <i>lclslogs</i> index and returns 20 lines. 
 </p>
 
 <div class="cmd withOutput">
@@ -126,7 +127,7 @@ ATTENTION: this query can take some time ...
 total hits: 557,365,125
 Mar  3 04:42:38 psnfs02 kernel: [4453638.338888] sd 1:0:45:0: [sdaj] Bad block number requested
 Feb 27 23:48:26 psnfs02 kernel: [4176799.486066] sd 1:0:45:0: [sdaj] Bad block number requested
-==== CUTTED LINES ====
+==== REMOVED LINES ====
 Mar  9 02:49:47 psana1216 monit[1956]: Processing queued event /var/monit/1549399756_1c92a80
 
 real    1m18.535s
@@ -137,13 +138,13 @@ sys     0m0.026s
 <p>
 <b>OBSERVE</b>
 <ul>
-<li> There are about 550 milion lines stored into Elasticsearch <i>lclslogs</i> index. 
+<li> There are about 550 million lines stored into Elasticsearch <i>lclslogs</i> index. 
 <li> The search took 1 minute and 20 seconds, it is quite a lot. This time is expected to increase on increasing the amount of data stored into Elasticsearch.
 </ul>
 </p>
 
 <p>
-<b>CASE.2</b> Random sample of 5 lines over all lines produced in between <span class="cmd">now</span> and 3 days ago <span class="cmd">now-3d</span>.
+<b>CASE 2.</b> Random sample of 5 lines over all lines produced in between <span class="cmd">now</span> and 3 days ago <span class="cmd">now-3d</span>.
 
 <div class="cmd withOutput">
 $> time elasticall --s0=5 --s2='now-3d' --s3='now'  \
@@ -167,14 +168,14 @@ sys     0m0.029s
 <p>
 <b>OBSERVE</b>
 <ul> 
-<li> "total hits: 10,214,480". This query ran across 10 milion documents to get its 5 elements selection.
+<li> "total hits: 10,214,480". This query ran across 10 million documents to get its 5 elements selection.
 <li> The query took about 0.2 seconds to be resolved.
 <li> This amount of time is expected not to grow much in future.
 </ul>
 </p>
 
 <p>
-<b>CASE.3</b> Random sample of 5 lines over all lines produced in the last month and matching the Lucene query <span class="cmd">nmingott AND (NOT psmetric*)</span>. 
+<b>CASE 3.</b> Random sample of 5 lines over all lines produced in the last month and matching the Lucene query <span class="cmd">nmingott AND (NOT psmetric*)</span>. 
 </p>
 
 <div class="cmd withOutput">
@@ -201,11 +202,11 @@ sys     0m0.023s
 <hr>
 
 <p>
-The validity of the method proposed in this section relies on <b>one powerfull assumtion</b>: <i>when something starts to go wrong in a machine there will be a massive production of similar error messages</i>.
+The validity of the method proposed in this section relies on <b>one powerful assumption</b>: <i>when something starts to go wrong in a machine there will be a massive production of similar error messages</i>.
 </p>
 
 <p>
-Sometimes the assumption may not hold, e.g. a machine may have the powersupply broken, there will not be any error log in this case, the machine will turn off. We disregard this kind of failures now.
+Sometimes the assumption may not hold, e.g. a machine may have the power supply broken, in this case there will not be any error log, the machine will turn off. We disregard this kind of failures now.
 </p>
 
 <p>
@@ -213,7 +214,7 @@ The supposedly there is something wrong in our machines and a consequent massive
 </p>
 
 <p>
-Then, there are problem that are logstanding, we can not fix them in one day, so it is often usefull to compare our current random sample with an old one. 
+Then, there are problem that are longstanding, which we can not fix in one day, they must be isolated. So it is often useful to compare our current random sample with an old one. 
 </p>
 
 <p>
@@ -305,14 +306,14 @@ Something persisting from the past instead is in machine <i>psrealay</i>, a <i>d
 </p>
 
 <p>
-The analysis is very crude but we can already establish with a good degree of confidence that we <i><b>may have a problem in *psanagpu104</b></i>. 
+The analysis is very crude but we can already establish with a good degree of confidence that we <i><b>may have a problem in psanagpu104</b></i>. 
 </p>
 
 <h2> Counting log lines  </h2>
 <hr>
 
 <p>
-Let's see the script <i>paramSearchAndCount</i> whose function is to count the number of docuements in the index lclslogs. 
+Let's see the script <i>paramSearchAndCount</i> whose function is to count the number of documents in the index lclslogs. 
 </p>
 
 <p>
@@ -321,7 +322,7 @@ Let's count all logs in the last hour.
 
 <div class="cmd withOutput">
 $> elasticall --s0='*' --s1='now-1h' --s2='now' \    
-/usr/local/etc/elasticall/paramSearchAndCount 
+               /usr/local/etc/elasticall/paramSearchAndCount 
 </div>
 
 <div class="output">
@@ -329,22 +330,23 @@ queries: '*', num.doc: 145,763
 </div>
 
 <p>
-Le't count all document in the last 24 hours matching the Lucene query "lustre AND (ana*)".
+Let's count all document in the last 24 hours matching the Lucene query <span class="cmd">lustre AND (ana*)</span>.
 </p>
 
 <div class="cmd withOutput">
-$> elasticall --s0='lustre AND (ana*)' --s1='now-1d' --s2='now' /usr/local/etc/elasticall/paramSearchAndCount 
+$> elasticall --s0='lustre AND (ana*)' --s1='now-1d' --s2='now' 
+               /usr/local/etc/elasticall/paramSearchAndCount 
 </div>
 
 <div class="output">
-querys: 'lustre AND (ana*)', num.doc: 144
+queries: 'lustre AND (ana*)', num.doc: 144
 </div>
 
 <h2> Getting the status of Elasticsearch  </h2>
 <hr>
 
 <p>
-Getting the Elasticserch status and it Java virtual machine statistics is just one query away. Unfortunately the result are extermely messy.
+Getting the Elasticsearch and its Java Virtual Machine status is just one query away. Unfortunately the result are extremely messy. <b>TODO</b>. A simple script to analize this will be developed in future.
 </p>
 
 <div class="cmd withOutput">

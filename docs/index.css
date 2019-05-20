@@ -12,7 +12,10 @@
 body {
 
     /* font-family: "Times New Roman", Times, serif; */
-    font-family: "sans";
+    /* font-family: "Roboto Condensed"; */
+    font-family: "Rambla";
+    /* font-family: "Dejavu Sans"; */
+
     font-size: 1.0em;
     line-height: 1.5;
 
@@ -47,6 +50,10 @@ p {
     margin-top: 20px;
 }
 
+b { 
+   color: maroon;
+}
+
 ol { 
     margin-top: 20px;
 }
@@ -79,16 +86,16 @@ li.fact {
 }
 
 span.cmd { 
-   font-family: "mono";
-   font-size: 0.90em;
+   font-family: "Roboto Mono";
+   font-size: 0.80em;
    /* font-family: monospace; */
     background-color: lightgrey;
-    color: darkred;    
+    color: blue;    
 }
 
 div.cmd { 
-   font-family: "mono";
-   font-size: 0.90em;
+   font-family: "Roboto Mono";
+   font-size: 0.80em;
    /* font-family: monospace; */
    white-space: pre-wrap;
    margin-top: 10px;
@@ -96,7 +103,7 @@ div.cmd {
    padding-left:10px;
    padding-bottom:10px;
    background-color: lightgrey;
-   color: darkred;    
+   color: blue;    
 }
 
 div.withOutput {
@@ -105,8 +112,8 @@ div.withOutput {
 }
 
 div.output { 
-   font-family: "mono";
-   font-size: 0.90em;
+   font-family: "Roboto Mono";
+   font-size: 0.80em;
    /* font-family: monospace; */
     overflow-x: auto;
    /* white-space: pre-wrap; */

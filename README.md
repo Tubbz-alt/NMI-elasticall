@@ -218,13 +218,60 @@ Something persisting from the past instead is in machine *psrealay*, a *dhcpd* e
 
 The analysis is very crude but we can already establish with a good degree of confidence that we ***may have a problem in *psanagpu104****. 
 
+## Counting log lines 
+
+Let's see the script *paramSearchAndCount* whose function is to count the number of docuements in the index lclslogs. 
+
+Let's count all logs in the last hour.
+
+```
+$> elasticall --s0='*' --s1='now-1h' --s2='now' \    
+/usr/local/etc/elasticall/paramSearchAndCount 
+```
+
+```
+queries: '*', num.doc: 145,763
+```
+
+Le't count all document in the last 24 hours matching the Lucene query "lustre AND (ana*)".
+
+```
+$> elasticall --s0='lustre AND (ana*)' --s1='now-1d' --s2='now' /usr/local/etc/elasticall/paramSearchAndCount 
+```
+```
+querys: 'lustre AND (ana*)', num.doc: 144
+```
 
 ## Getting the status of Elasticsearch 
 
-## Let's do some scripting 
+Getting the Elasticserch status and it Java virtual machine statistics is just one query away. Unfortunately the result are extermely messy.
 
-## Counting documents, aka log lines
+```
+$> curl -XGET 'http://psmetric04:9200/_nodes/stats?pretty=true'
+```
+```
+... .. .. .. ... ....
+      "jvm" : {
+        "timestamp" : 1558133036326,
+        "uptime_in_millis" : 340242256,
+        "mem" : {
+          "heap_used_in_bytes" : 2649697608,
+          "heap_used_percent" : 50,
+          "heap_committed_in_bytes" : 5255331840,
+          "heap_max_in_bytes" : 5255331840,
+          "non_heap_used_in_bytes" : 175657304,
+          "non_heap_committed_in_bytes" : 190705664,
+          "pools" : {
+            "young" : {
+              "used_in_bytes" : 567601824,
+              "max_in_bytes" : 907345920,
+              "peak_used_in_bytes" : 907345920,
+              "peak_max_in_bytes" : 907345920
+            },
+.. .. .. .. ...
+```
 
 
+Let's build 
 
 

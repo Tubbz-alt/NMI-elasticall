@@ -72,17 +72,13 @@ Looking at command [4] <span class="cmd">elasticall</span> seems similar to a pr
 <li>  Run the installation script: `$> sudo install`
 <li>  Test run, shows the builtin manual: 
 
-<pre>
+<div class="cmd">
 $> elasticall -h
-</pre>
-
-<pre>
-=> MANUAL TEXT ...
-</pre>
+</div>
 
 <li> Easy task, show the number all log lines stored into LCLS-logs index.
 
-<div class="cmd,withResult">
+<div class="cmd withOutput">
 $> elasticall --s0='*' /usr/local/etc/elasticall/paramSearchAndCount
 </div>
 
@@ -113,12 +109,13 @@ A random sample, if well taken, implies that all the sample space must be visite
 </p>
 
 <p>
-***CASE.1*** Random sample without parameters, by default runs on all of Elasticsearch *lclslogs* index and returns 20 lines. 
+<b>CASE.1</b> Random sample without parameters, by default runs on all of Elasticsearch *lclslogs* index and returns 20 lines. 
 </p>
 
-<div class="code, withOutput">
+<div class="cmd withOutput">
 $> time elasticall queries/paramRandomSample2
 </div>
+
 <div class="output">
 time elasticall /usr/local/etc/elasticall/paramRandomSample2 
 ATTENTION: this query can take some time ... 
@@ -144,8 +141,8 @@ sys     0m0.026s
 <p>
 <b>CASE.2</b> Random sample of 5 lines over all lines produced in between `now` and 3 days ago `now-3d`.
 
-<div class="cmd">
- time elasticall --s0=5 --s2='now-3d' --s3='now'  \
+<div class="cmd withOutput">
+$> time elasticall --s0=5 --s2='now-3d' --s3='now'  \
                   /usr/local/etc/elasticall/paramRandomSample2
 </div>
 
@@ -163,19 +160,25 @@ user    0m0.188s
 sys     0m0.029s
 </div>
 
-***OBSERVE***. 
-- "total hits: 10,214,480". This query ran across 10 milion documents to get its 5 elements selection.
-- The query took about 0.2 seconds to be resolved.
-- This amount of time is expected not to grow much in future.
+<p>
+<b>OBSERVE</b>
+<ul> 
+<li> "total hits: 10,214,480". This query ran across 10 milion documents to get its 5 elements selection.
+<li> The query took about 0.2 seconds to be resolved.
+<li> This amount of time is expected not to grow much in future.
+</ul>
+</p>
 
-***CASE.3*** Random sample of 5 lines over all lines produced in the last month and matching the Lucene query `nmingott AND (NOT psmetric*)`. 
+<p>
+<b>CASE.3</b> Random sample of 5 lines over all lines produced in the last month and matching the Lucene query `nmingott AND (NOT psmetric*)`. 
+</p>
 
-```
-time elasticall --s0=5 --s1='nmingott AND (NOT psmetric*)' \
+<div class="cmd withOutput">
+$> time elasticall --s0=5 --s1='nmingott AND (NOT psmetric*)' \
                    /usr/local/etc/elasticall/paramRandomSample2 
-```
+</div>
 
-```
+<div class="output">
 ATTENTION: this query can take some time ... 
 total hits: 101,995
 Dec 26 07:55:01 psanagpu101 systemd[1]: Starting Session 1819742 of user nmingott.
@@ -187,25 +190,37 @@ Dec 20 06:40:01 psana102 systemd: Starting Session 5116 of user nmingott.
 real    0m0.455s
 user    0m0.205s
 sys     0m0.023s
-```
+</div>
 
-## Random Sample to detect anomalies 
 
+<h2> Random Sample to detect anomalies  </h2>
+
+<p>
 The validity of the method proposed in this section relies on **one powerfull assumtion**: *when something starts to go wrong in a machine there will be a massive production of similar error messages*.
+</p>
 
+<p>
 Sometimes the assumption may not hold, e.g. a machine may have the powersupply broken, there will not be any error log in this case, the machine will turn off. We disregard this kind of failures now.
+</p>
 
+<p>
 The supposedly there is something wrong in our machines and a consequent massive production of error messages how could we spot the fact without too much technicalities? We just take a random sample, if we see repeated messages there is a good probability we have a problem.
+</p>
 
+<p>
 Then, there are problem that are logstanding, we can not fix them in one day, so it is often usefull to compare our current random sample with an old one. 
+</p>
 
+<p>
 Let's see an example. We start by taking a random sample of messages from the few last days. 
+</p>
 
-```
+<div class="cmd withOutput">
 $> time elasticall --s0=20 --s2='now-2d' --s3='now'\
                     /usr/local/etc/elasticall/paramRandomSample2
-```
-```
+</div>
+
+<div class="output">
 ATTENTION: this query can take some time ... 
 total hits: 6,876,159
 May 16 11:10:01 psana1408 crond[30014]: (root) FAILED to authorize user with PAM (Failure setting user credentials)
@@ -232,18 +247,22 @@ May 15 21:03:48 psanagpu104 rpc.gssd[1273]: ERROR: gssd_refresh_krb5_machine_cre
 real    0m0.837s
 user    0m0.194s
 sys     0m0.024s
-```
+</div>
 
+<p>
 We see there is something to fix in *psanagpu104* and in general it is the service *rpc.gssd*, it seems an authentication problem.
+</p>
 
+<p>
 Let's compare with a sample of 20 messages produced between 1 and 2 months ago. 
+</p>
 
-```
+<div class="cmd withOutput">
  $> time elasticall --s0=20 --s2='now-2M' --s3='now-1M' \
                      /usr/local/etc/elasticall/paramRandomSample2
-```
+</div>
 
-```
+<div class="output">
 ATTENTION: this query can take some time ... 
 total hits: 72,552,603
 Mar 18 17:56:06 psana1119 monit[1859]: Processing queued event /var/monit/1550881320_1eac350
@@ -270,46 +289,62 @@ Apr 16 14:04:25 psrelay.pcdsn dhcpd: DHCPDISCOVER from 00:25:90:02:ef:d4 via 172
 real    0m9.999s
 user    0m0.188s
 sys     0m0.028s
-```
+</div>
 
+<p>
 We see the service *rpc.gssd* does not appear at all in the past. This must be a recent problem. 
+</p>
 
+<p>
 Something persisting from the past instead is in machine *psrealay*, a *dhcpd* error message. It seems some computer is not getting an IP. 
+</p>
 
+<p>
 The analysis is very crude but we can already establish with a good degree of confidence that we ***may have a problem in *psanagpu104****. 
+</p>
 
-## Counting log lines 
+<h2> Counting log lines  </h2>
 
+<p>
 Let's see the script *paramSearchAndCount* whose function is to count the number of docuements in the index lclslogs. 
+</p>
 
+<p>
 Let's count all logs in the last hour.
+</p>
 
-```
+<div class="cmd withOutput">
 $> elasticall --s0='*' --s1='now-1h' --s2='now' \    
 /usr/local/etc/elasticall/paramSearchAndCount 
-```
+</div>
 
-```
+<div class="output">
 queries: '*', num.doc: 145,763
-```
+</div>
 
+<p>
 Le't count all document in the last 24 hours matching the Lucene query "lustre AND (ana*)".
+</p>
 
-```
+<div class="cmd withOutput">
 $> elasticall --s0='lustre AND (ana*)' --s1='now-1d' --s2='now' /usr/local/etc/elasticall/paramSearchAndCount 
-```
-```
+</div>
+
+<div class="output">
 querys: 'lustre AND (ana*)', num.doc: 144
-```
+</div>
 
-## Getting the status of Elasticsearch 
+<h2> Getting the status of Elasticsearch  </h2>
 
+<p>
 Getting the Elasticserch status and it Java virtual machine statistics is just one query away. Unfortunately the result are extermely messy.
+</p>
 
-```
+<div class="cmd withOutput">
 $> curl -XGET 'http://psmetric04:9200/_nodes/stats?pretty=true'
-```
-```
+</div>
+
+<div class="output">
 ... .. .. .. ... ....
       "jvm" : {
         "timestamp" : 1558133036326,
@@ -329,29 +364,5 @@ $> curl -XGET 'http://psmetric04:9200/_nodes/stats?pretty=true'
               "peak_max_in_bytes" : 907345920
             },
 .. .. .. .. ...
-```
-
-
-Let's build 
-
-
-
-
-<div id="spaceAfterTitle"> </div>
-
-<ol class="factList">
-
-<li class="fact"> elastico was developed to search quickly into Elasticsearch from the shell. 
-
-<li class="fact"> esempio: 
-<div>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/MWg3whIssuE" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
 
-
-
-</ol>
-
-</body>
-
-</html>

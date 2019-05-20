@@ -31,6 +31,7 @@
 Shell tool to query and monitor Elasticsearch
 
 <h2> Motivation </h2>
+<hr>
 
 I would like to be able to give such kind of high level commands from the shell: 
 
@@ -62,6 +63,7 @@ Looking at command [4] <span class="cmd">elasticall</span> seems similar to a pr
 </p>
 
 <h2> Installation & run</h2>
+<hr>
 
 <p>
 <b>CAVEAT</b> The procedure is tested working for <b>lclslogs</b> Elasticsearch index and for the program <span class="cmd">elasticall</span> to be installed in <i>psmetric01</i>. Other users in other networks need to tweak some details, as the Elasticsearch URL, in the source code.
@@ -89,6 +91,7 @@ $> elasticall --s0='*' /usr/local/etc/elasticall/paramSearchAndCount
 
 
 <h2> Heads up ! </h2>
+<hr>
 
 <p>
 <b>CAVEAT for LCLS users.</b> Before you do any test you must be aware of this important fact. <span class="cmd">elasticall</span> runs in <b>psmetric01</b> but the Elasticsearch server runs in <b>psmetric04</b>. If you run a search that takes time and kill <span class="cmd">elasticall</span> before it ends, by e.g. <span class="cmd">Ctrl+C</span>, or <span class="cmd">kill</span>, the search will keep on running on <b>psmetric04</b>! 
@@ -99,6 +102,7 @@ If you intend to run multiple queries via <span class="cmd">elasticall</span> an
 </p>
 
 <h2> Random Sample to measure search performace </h2>
+<hr>
 
 <p>
 <b>Def.</b> What is called here <b>random sample</b> is a shortcut for 'random sample without replacement'. This is what I implemented.
@@ -194,6 +198,7 @@ sys     0m0.023s
 
 
 <h2> Random Sample to detect anomalies  </h2>
+<hr>
 
 <p>
 The validity of the method proposed in this section relies on <b>one powerfull assumtion</b>: <i>when something starts to go wrong in a machine there will be a massive production of similar error messages</i>.
@@ -304,6 +309,7 @@ The analysis is very crude but we can already establish with a good degree of co
 </p>
 
 <h2> Counting log lines  </h2>
+<hr>
 
 <p>
 Let's see the script <i>paramSearchAndCount</i> whose function is to count the number of docuements in the index lclslogs. 
@@ -335,6 +341,7 @@ querys: 'lustre AND (ana*)', num.doc: 144
 </div>
 
 <h2> Getting the status of Elasticsearch  </h2>
+<hr>
 
 <p>
 Getting the Elasticserch status and it Java virtual machine statistics is just one query away. Unfortunately the result are extermely messy.

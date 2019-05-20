@@ -42,7 +42,7 @@ I would like to be able to give such kind of high level commands from the shell:
 </ol>
 
 <p>
-Commands [1,2,3,4] provide interesting output but there is more we can get than the sheer answer. Running `time` on command [2] is the best way I can figure out to measure the <b>search time performance</b> of Elasticsearch. Indeed, to take a random sample Elasticsearch is forced to visit all the sample-space each time. If you repeat two time the same command you should get similar response time.
+Commands [1,2,3,4] provide interesting output but there is more we can get than the sheer answer. Running <span class="cmd">time</span> on command [2] is the best way I can figure out to measure the <b>search time performance</b> of Elasticsearch. Indeed, to take a random sample Elasticsearch is forced to visit all the sample-space each time. If you repeat two time the same command you should get similar response time.
 </p>
 
 <p>
@@ -54,22 +54,22 @@ Looking at command [4] <span class="cmd">elasticall</span> seems similar to a pr
 </p>
 
 <p>
-<span class="cmd">elasticall</span> calls always a <b>recipe script file</b>, the recipe file containes [1] the JSON command to send to Elasticsearch in a very readable format [2] preprocessing routines and [3] postprocessing routines. I give a few examples of script files below, using them as template it is not difficult to extend *elasticall* capabilities but adding new scripts. 
+<span class="cmd">elasticall</span> calls always a <b>recipe script file</b>, the recipe file containes [1] the JSON command to send to Elasticsearch in a very readable format [2] preprocessing routines and [3] postprocessing routines. I give a few examples of script files below, using them as template it is not difficult to extend <i>elasticall</i> capabilities but adding new scripts. 
 </p>
 
 <p>
-<span class="cmd">$> elasticall -h</span> provides a brief manual page. The provided script files available in directory *query* and are commented.
+<span class="cmd">$> elasticall -h</span> provides a brief manual page. The provided script files available in directory <i>query</i> and are commented.
 </p>
 
 <h2> Installation & run</h2>
 
 <p>
-<b>CAVEAT</b> The procedure is tested working for **lclslogs** Elasticsearch index and for the program `elasticall` to be installed in *psmetric01*. Other users in other networks need to tweak some details, as the Elasticsearch URL, in the source code.
+<b>CAVEAT</b> The procedure is tested working for <b>lclslogs</b> Elasticsearch index and for the program <span class="cmd">elasticall</span> to be installed in <i>psmetric01</i>. Other users in other networks need to tweak some details, as the Elasticsearch URL, in the source code.
 </p>
 
 <ul>
 <li>  Get the source from GitHub
-<li>  Run the installation script: `$> sudo install`
+<li>  Run the installation script: <span class="cmd">$> sudo install</span>
 <li>  Test run, shows the builtin manual: 
 
 <div class="cmd">
@@ -101,7 +101,7 @@ If you intend to run multiple queries via <span class="cmd">elasticall</span> an
 <h2> Random Sample to measure search performace </h2>
 
 <p>
-<b>Def.</b> What is called here **random sample** is a shortcut for 'random sample without replacement'. This is what I implemented.
+<b>Def.</b> What is called here <b>random sample</b> is a shortcut for 'random sample without replacement'. This is what I implemented.
 </p>
 
 <p>
@@ -109,7 +109,7 @@ A random sample, if well taken, implies that all the sample space must be visite
 </p>
 
 <p>
-<b>CASE.1</b> Random sample without parameters, by default runs on all of Elasticsearch *lclslogs* index and returns 20 lines. 
+<b>CASE.1</b> Random sample without parameters, by default runs on all of Elasticsearch <i>lclslogs</i> index and returns 20 lines. 
 </p>
 
 <div class="cmd withOutput">
@@ -133,13 +133,13 @@ sys     0m0.026s
 <p>
 <b>OBSERVE</b>
 <ul>
-<li> There are about 550 milion lines stored into Elasticsearch *lclslogs* index. 
+<li> There are about 550 milion lines stored into Elasticsearch <i>lclslogs</i> index. 
 <li> The search took 1 minute and 20 seconds, it is quite a lot. This time is expected to increase on increasing the amount of data stored into Elasticsearch.
 </ul>
 </p>
 
 <p>
-<b>CASE.2</b> Random sample of 5 lines over all lines produced in between `now` and 3 days ago `now-3d`.
+<b>CASE.2</b> Random sample of 5 lines over all lines produced in between <span class="cmd">now</span> and 3 days ago <span class="cmd">now-3d</span>.
 
 <div class="cmd withOutput">
 $> time elasticall --s0=5 --s2='now-3d' --s3='now'  \
@@ -170,7 +170,7 @@ sys     0m0.029s
 </p>
 
 <p>
-<b>CASE.3</b> Random sample of 5 lines over all lines produced in the last month and matching the Lucene query `nmingott AND (NOT psmetric*)`. 
+<b>CASE.3</b> Random sample of 5 lines over all lines produced in the last month and matching the Lucene query <span class="cmd">nmingott AND (NOT psmetric*)</span>. 
 </p>
 
 <div class="cmd withOutput">
@@ -196,7 +196,7 @@ sys     0m0.023s
 <h2> Random Sample to detect anomalies  </h2>
 
 <p>
-The validity of the method proposed in this section relies on **one powerfull assumtion**: *when something starts to go wrong in a machine there will be a massive production of similar error messages*.
+The validity of the method proposed in this section relies on <b>one powerfull assumtion</b>: <i>when something starts to go wrong in a machine there will be a massive production of similar error messages</i>.
 </p>
 
 <p>
@@ -250,7 +250,7 @@ sys     0m0.024s
 </div>
 
 <p>
-We see there is something to fix in *psanagpu104* and in general it is the service *rpc.gssd*, it seems an authentication problem.
+We see there is something to fix in <i>psanagpu104</i> and in general it is the service <i>rpc.gssd</i>, it seems an authentication problem.
 </p>
 
 <p>
@@ -292,21 +292,21 @@ sys     0m0.028s
 </div>
 
 <p>
-We see the service *rpc.gssd* does not appear at all in the past. This must be a recent problem. 
+We see the service <i>rpc.gssd</i> does not appear at all in the past. This must be a recent problem. 
 </p>
 
 <p>
-Something persisting from the past instead is in machine *psrealay*, a *dhcpd* error message. It seems some computer is not getting an IP. 
+Something persisting from the past instead is in machine <i>psrealay</i>, a <i>dhcpd</i> error message. It seems some computer is not getting an IP. 
 </p>
 
 <p>
-The analysis is very crude but we can already establish with a good degree of confidence that we ***may have a problem in *psanagpu104****. 
+The analysis is very crude but we can already establish with a good degree of confidence that we <i><b>may have a problem in *psanagpu104</b></i>. 
 </p>
 
 <h2> Counting log lines  </h2>
 
 <p>
-Let's see the script *paramSearchAndCount* whose function is to count the number of docuements in the index lclslogs. 
+Let's see the script <i>paramSearchAndCount</i> whose function is to count the number of docuements in the index lclslogs. 
 </p>
 
 <p>

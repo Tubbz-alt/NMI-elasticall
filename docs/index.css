@@ -11,16 +11,49 @@
 
 body {
     /* per non mostrare le barre di scorrimento  */
-    overflow-y:hidden;
-    overflow-x:hidden;
-    margin-top: 20px;
-    margin-left: 20px;
+    /* overflow-y:hidden; */
+    /* overflow-x:hidden; */
+
+    /* margin-top: 20px; */
+    /* margin-left: 20px; */
+
+    margin-top: 20px;;
+    margin-bottom: 20px;;
+    margin-right: 10%;
+    margin-left: 10%;
+    border: 1px solid grey;
+    padding-left: 20px;
+    padding-right: 20px;
 }
+
+h1 {
+  margin-top: 40px;
+  margin-bottom: 20px;
+}
+
+
+h2 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
 
 p { 
     margin-top: 20px;
 }
 
+ol { 
+  margin-top: 20px;
+}
+
+ul { 
+  margin-top: 20px;
+}
+
+li { 
+   margin-left: 40px;
+   margin-top: 10px;
+}
 
 div.centerDiv { 
      text-align: center;     
@@ -31,12 +64,38 @@ div#spaceAfterTitle {
     margin-bottom: 20px;
 }
 
+
 ol.factList { 
     margin-left: 20px;
 }
 
 li.fact { 
     margin-top: 20px;
+}
+
+span.cmd { 
+    background-color: lightgrey;
+    color: blue;    
+}
+
+div.cmd { 
+   font-family: monospace;
+   white-space: pre;
+   margin-top: 10px;
+   margin-bottom: 10px;
+   background-color: lightgrey;
+   color: blue;    
+}
+
+div.withResult {
+   margin-bottom: 0px;    
+}
+
+div.output { 
+   font-family: monospace;
+   white-space: pre;
+   background-color: lightgrey;
+   color: black;        
 }
 
 /* table#applications {  */
